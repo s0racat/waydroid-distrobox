@@ -16,6 +16,8 @@ RUN dnf install -y \
 
 RUN chmod +x /usr/bin/waydroid-wrapper
 
-RUN passwd -d root
+# https://github.com/89luca89/distrobox/issues/1531#issuecomment-2561158209
+RUN chmod 600 /etc/shadow
+
 # Cleanup
 RUN rm -rf /tmp/*
