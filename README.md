@@ -10,6 +10,7 @@ distrobox create --root \
   --image ghcr.io/s0racat/waydroid-toolbox:latest \
   --init \
   --unshare-all \
+  --volume /lib/modules:/lib/modules:ro \
   --name waydroid
 
 distrobox enter --root waydroid
