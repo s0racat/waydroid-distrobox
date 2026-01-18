@@ -16,5 +16,6 @@ RUN dnf install -y \
 
 RUN chmod +x /usr/bin/waydroid-wrapper
 
+RUN passwd -d root
 # Cleanup
 RUN rm -rf /tmp/*
