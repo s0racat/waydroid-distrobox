@@ -6,7 +6,7 @@ on:
   schedule:
     - cron: '20 18 * * *'  # 8:20pm everyday
 env:
-    IMAGE_NAME: fedora-toolbox
+    IMAGE_NAME: waydroid-toolbox
     IMAGE_TAGS: latest
     IMAGE_REGISTRY: ghcr.io/${{ github.repository_owner }}
 
