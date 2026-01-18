@@ -3,6 +3,8 @@ on:
   pull_request:
   merge_group:
   workflow_dispatch:
+  schedule:
+    - cron: '20 18 * * *'  # 8:20pm everyday
 env:
     IMAGE_NAME: fedora-toolbox
     IMAGE_TAGS: latest
