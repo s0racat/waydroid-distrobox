@@ -1,4 +1,4 @@
-FROM ghcr.io/ublue-os/fedora-distrobox:latest AS waydroid-distrobox
+FROM ghcr.io/ublue-os/fedora-toolbox:latest AS waydroid-distrobox
 
 COPY system_files /
 
