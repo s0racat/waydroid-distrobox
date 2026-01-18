@@ -1,89 +1,36 @@
-name: Build Waydroid-Distrobox
+name: Build and Push Fedora Toolbox Image
 on:
-  schedule:
-    - cron: '20 18 * * *'  # 8:20pm everyday
   pull_request:
-    branches:
-      - main
-    paths-ignore:
-      - '**.md'
-      - '**.txt'
-  pull_request_review:
-    type: [submitted]
-  push:
-    branches:
-      - main
-    paths-ignore:
-      - '**.md'
-      - '**.txt'
   merge_group:
   workflow_dispatch:
 env:
+    IMAGE_NAME: fedora-toolbox
+    IMAGE_TAGS: latest
     IMAGE_REGISTRY: ghcr.io/${{ github.repository_owner }}
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref || github.run_id }}
+  cancel-in-progress: true
 
 jobs:
   push-ghcr:
     name: Build and push image
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     permissions:
       contents: read
       packages: write
       id-token: write
     strategy:
       fail-fast: false
-      matrix:
-        base_name: [waydroid-distrobox]
-        include:
-          - is_latest_version: true
-            is_stable_version: true
     steps:
       # Checkout push-to-registry action GitHub repository
       - name: Checkout Push to Registry action
-        uses: actions/checkout@v4
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5
 
-      - name: Matrix Variables
-        run: |
-          echo "IMAGE_NAME=${{ matrix.base_name }}" >> $GITHUB_ENV
-
-      - name: Generate tags
-        id: generate-tags
-        shell: bash
-        run: |
-          # Generate a timestamp for creating an image version history
-          TIMESTAMP="$(date +%Y%m%d)"
-          COMMIT_TAGS=()
-          BUILD_TAGS=()
-          # Have tags for tracking builds during pull request
-          SHA_SHORT="${GITHUB_SHA::7}"
-          COMMIT_TAGS+=("pr-${{ github.event.pull_request.number }}")
-          COMMIT_TAGS+=("${SHA_SHORT}")
-          if [[ "${{ matrix.is_latest_version }}" == "true" ]] && \
-             [[ "${{ matrix.is_stable_version }}" == "true" ]]; then
-              COMMIT_TAGS+=("pr-${{ github.event.pull_request.number }}")
-              COMMIT_TAGS+=("${SHA_SHORT}")
-          fi
-
-          BUILD_TAGS=("${TIMESTAMP}")
-
-          if [[ "${{ matrix.is_latest_version }}" == "true" ]] && \
-             [[ "${{ matrix.is_stable_version }}" == "true" ]]; then
-              BUILD_TAGS+=("latest")
-          fi
-
-          if [[ "${{ github.event_name }}" == "pull_request_review" ]]; then
-              echo "Generated the following commit tags: "
-              for TAG in "${COMMIT_TAGS[@]}"; do
-                  echo "${TAG}"
-              done
-              alias_tags=("${COMMIT_TAGS[@]}")
-          else
-              alias_tags=("${BUILD_TAGS[@]}")
-          fi
-          echo "Generated the following build tags: "
-          for TAG in "${BUILD_TAGS[@]}"; do
-              echo "${TAG}"
-          done
-          echo "alias_tags=${alias_tags[*]}" >> $GITHUB_OUTPUT
+      # - name: Verify Fedora distrobox
+      #   uses: EyeCantCU/cosign-action/verify@58722a084c82190b57863002d494c91eabbe9e79 # v0.3.0
+      #   with:
+      #     containers: fedora-distrobox:latest
 
       # Build metadata
       - name: Image Metadata
@@ -93,10 +40,7 @@ jobs:
           images: |
             ${{ env.IMAGE_NAME }}
           labels: |
-            org.opencontainers.image.title=${{ env.IMAGE_NAME }}
-            org.opencontainers.image.version=${{ steps.labels.outputs.VERSION }}
-            org.opencontainers.image.description=These images are not meant to be used as a host operating system. Please see fedora-distrobox for more information.
-            io.artifacthub.package.readme-url=https://raw.githubusercontent.com/ublue-os/fedora-distrobox/main/README.md
+            io.artifacthub.package.readme-url=https://raw.githubusercontent.com/ublue-os/boxkit/main/README.md
 
       # Build image using Buildah action
       - name: Build Image
@@ -106,26 +50,23 @@ jobs:
           containerfiles: |
             ./Containerfile
           image: ${{ env.IMAGE_NAME }}
-          tags: |
-            ${{ steps.generate-tags.outputs.alias_tags }}
+          tags: ${{ env.IMAGE_TAGS }}
           labels: ${{ steps.meta.outputs.labels }}
           oci: false
-          extra-args: |
-            --target=${{ matrix.base_name }}
 
       # Workaround bug where capital letters in your GitHub username make it impossible to push to GHCR.
       # https://github.com/macbre/push-to-ghcr/issues/12
       - name: Lowercase Registry
         id: registry_case
-        uses: ASzc/change-string-case-action@v5
+        uses: ASzc/change-string-case-action@d0603cd0a7dd490be678164909f65c7737470a7f # v6
         with:
           string: ${{ env.IMAGE_REGISTRY }}
 
       # Push the image to GHCR (Image Registry)
       - name: Push To GHCR
-        uses: redhat-actions/push-to-registry@v2
-        id: push
+        uses: redhat-actions/push-to-registry@5ed88d269cf581ea9ef6dd6806d01562096bee9c # v2
         if: github.event_name != 'pull_request'
+        id: push
         env:
           REGISTRY_USER: ${{ github.actor }}
           REGISTRY_PASSWORD: ${{ github.token }}
@@ -136,11 +77,10 @@ jobs:
           username: ${{ env.REGISTRY_USER }}
           password: ${{ env.REGISTRY_PASSWORD }}
           extra-args: |
-            --disable-content-trust
             --compression-format=zstd:chunked
 
       - name: Login to GitHub Container Registry
-        uses: docker/login-action@v3
+        uses: docker/login-action@5e57cd118135c172c3672efd75eb46360885c0ef # v3
         if: github.event_name != 'pull_request'
         with:
           registry: ghcr.io
@@ -148,19 +88,22 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
 
       # Sign container
-      # - uses: sigstore/cosign-installer@v3.1.2
+      # - uses: sigstore/cosign-installer@d7543c93d881b35a8faa02e8e3605f69b7a1ce62 # v3.10.0
       #   if: github.event_name != 'pull_request'
 
       # - name: Sign container image
-        # if: github.event_name != 'pull_request'
-        # run: |
-        #   cosign sign -y --key env://COSIGN_PRIVATE_KEY ${{ steps.registry_case.outputs.lowercase }}/${{ env.IMAGE_NAME }}@${TAGS}
-        # env:
-        #   TAGS: ${{ steps.push.outputs.digest }}
-        #   COSIGN_EXPERIMENTAL: false
-        #   COSIGN_PRIVATE_KEY: ${{ secrets.SIGNING_SECRET }}
+      #   if: github.event_name != 'pull_request'
+      #   run: |
+      #     echo "${{ env.COSIGN_PRIVATE_KEY }}" > cosign.key
+      #     wc -c cosign.key
+      #     cosign sign -y --key cosign.key ${{ steps.registry_case.outputs.lowercase }}/${{ env.IMAGE_NAME }}@${TAGS}
+      #   env:
+      #     TAGS: ${{ steps.push.outputs.digest }}
+      #     COSIGN_EXPERIMENTAL: false
+      #     COSIGN_PRIVATE_KEY: ${{ secrets.SIGNING_SECRET }}
 
       - name: Echo outputs
-        if: github.event_name != 'pull_request'
+        env:
+          BUILD_IMAGE_OUTPUTS: ${{ toJSON(steps.build_image.outputs) }}
         run: |
-          echo "${{ toJSON(steps.push.outputs) }}"
+          echo "$BUILD_IMAGE_OUTPUTS"
