@@ -14,5 +14,7 @@ RUN dnf install -y \
         mutter \
         lzip
 
+RUN chmod +x /usr/bin/waydroid-wrapper
+
 # Cleanup
 RUN rm -rf /tmp/*
