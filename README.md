@@ -17,5 +17,6 @@ distrobox enter --root waydroid
 ```
 
 ```bash
-waydroid
+sudo waydroid init -s VANILLA|GAPPS -c 'https://ota.waydro.id/system' -v 'https://ota.waydro.id/vendor'
+waydroid show-full-ui
 ```
