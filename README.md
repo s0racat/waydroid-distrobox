@@ -6,7 +6,7 @@
 
 
 ```bash
-distrobox create --root \                  
+distrobox create --root \
   --image ghcr.io/s0racat/waydroid-toolbox:latest \
   --init \
   --unshare-all \
