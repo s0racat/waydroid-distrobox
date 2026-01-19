@@ -12,12 +12,19 @@ RUN dnf install -y \
         kmod \
         curl \
         mutter \
-        lzip
+        lzip \
+        git \
+        python
 
 RUN chmod +x /usr/bin/waydroid-wrapper
 
 # https://github.com/89luca89/distrobox/issues/1531#issuecomment-2561158209
 RUN chmod 600 /etc/shadow
+
+RUN git clone https://github.com/casualsnek/waydroid_script && \
+  cd waydroid_script && \
+  python3 -m venv venv && \
+  venv/bin/pip install -r requirements.txt
 
 # Cleanup
 RUN rm -rf /tmp/*
