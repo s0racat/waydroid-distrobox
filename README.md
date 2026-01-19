@@ -16,7 +16,15 @@ distrobox create --root \
 distrobox enter --root waydroid
 ```
 
+## setup
+
 ```bash
 sudo waydroid init -s VANILLA|GAPPS -c 'https://ota.waydro.id/system' -v 'https://ota.waydro.id/vendor'
 waydroid show-full-ui
+```
+
+## waydroid_script
+
+```bash
+sudo venv/bin/python3 /waydroid_script/main.py
 ```
