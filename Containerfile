@@ -14,7 +14,8 @@ RUN dnf install -y \
         mutter \
         lzip \
         git \
-        python
+        python \
+        e2fsck
 
 RUN chmod +x /usr/bin/waydroid-wrapper
 
@@ -25,6 +26,9 @@ RUN git clone https://github.com/casualsnek/waydroid_script && \
   cd waydroid_script && \
   python3 -m venv venv && \
   venv/bin/pip install -r requirements.txt
+
+# https://github.com/casualsnek/waydroid_script/issues/251
+RUN sed 's/if result.stderr/if result.returncode != 0 and result.stderr/' /waydroid_script/tools/helper.py
 
 # Cleanup
 RUN rm -rf /tmp/*
