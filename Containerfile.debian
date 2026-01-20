@@ -2,7 +2,7 @@ FROM quay.io/toolbx-images/debian-toolbox:13 AS waydroid-distrobox
 
 COPY system_files /
 
-RUN curl -s https://repo.waydro.id | sudo bash
+RUN apt update && apt install curl -y ; curl -s https://repo.waydro.id | sudo bash
 
 # Install Waydroid & required packages
 RUN apt install -y \
