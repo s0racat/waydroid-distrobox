@@ -29,7 +29,7 @@ RUN git clone https://github.com/casualsnek/waydroid_script && \
 
 # https://github.com/casualsnek/waydroid_script/issues/251
 RUN cd /waydroid_script && \
-  sed -i 's/if result.stderr/if result.returncode != 0 and result.stderr/' tools/helper.py
+  sed -i 's/if result.stderr/if result.returncode != 0 and result.stderr/' tools/helper.py && \
   git diff .
 
 # Cleanup
