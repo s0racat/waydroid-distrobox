@@ -28,7 +28,9 @@ RUN git clone https://github.com/casualsnek/waydroid_script && \
   venv/bin/pip install -r requirements.txt
 
 # https://github.com/casualsnek/waydroid_script/issues/251
-RUN sed 's/if result.stderr/if result.returncode != 0 and result.stderr/' /waydroid_script/tools/helper.py
+RUN cd /waydroid_script && \
+  sed -i 's/if result.stderr/if result.returncode != 0 and result.stderr/' tools/helper.py
+  git diff .
 
 # Cleanup
 RUN rm -rf /tmp/*
