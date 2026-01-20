@@ -11,6 +11,7 @@ RUN apt install -y \
   lzip \
   git \
   python3 \
+  python3-venv \
   waydroid \
   e2fsprogs
 
