@@ -1,0 +1,30 @@
+FROM quay.io/toolbx-images/debian-toolbox:13 AS waydroid-distrobox
+
+COPY system_files /
+
+RUN curl -s https://repo.waydro.id | sudo bash
+
+# Install Waydroid & required packages
+RUN apt install -y \
+  systemd libpam-systemd curl kmod dbus-x11 iptables mutter \
+  ca-certificates \
+  lzip \
+  git \
+  python3 \
+  waydroid \
+  e2fsck
+
+RUN chmod +x /usr/bin/waydroid-wrapper
+
+RUN git clone https://github.com/casualsnek/waydroid_script && \
+  cd waydroid_script && \
+  python3 -m venv venv && \
+  venv/bin/pip install -r requirements.txt
+
+# https://github.com/casualsnek/waydroid_script/issues/251
+RUN cd /waydroid_script && \
+  sed -i 's/if result.stderr/if result.returncode != 0 and result.stderr/' tools/helper.py && \
+  git diff .
+
+# Cleanup
+RUN rm -rf /tmp/*
