@@ -26,5 +26,5 @@ waydroid show-full-ui
 ## waydroid_script
 
 ```bash
-sudo venv/bin/python3 /waydroid_script/main.py
+cd /waydroid_script ; sudo venv/bin/python3 main.py
 ```
