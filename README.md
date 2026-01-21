@@ -28,3 +28,10 @@ waydroid show-full-ui
 ```bash
 cd /waydroid_script ; sudo venv/bin/python3 main.py
 ```
+
+## weston
+
+```bash
+SHELL=/bin/bash weston
+# launch terminal
+```
