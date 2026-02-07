@@ -11,6 +11,7 @@ distrobox create --root \
   --init \
   --unshare-all \
   --volume /lib/modules:/lib/modules:ro \
+  --absolutely-disable-root-password-i-am-really-positively-sure \
   --name waydroid
 
 distrobox enter --root waydroid
