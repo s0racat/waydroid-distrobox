@@ -7,7 +7,7 @@
 
 ```bash
 distrobox create --root \
-  --image ghcr.io/s0racat/waydroid-toolbox-d:latest \
+  --image ghcr.io/s0racat/waydroid-toolbox:latest \
   --init \
   --unshare-all \
   --volume /lib/modules:/lib/modules:ro \
