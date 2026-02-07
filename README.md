@@ -20,7 +20,7 @@ distrobox enter --root waydroid
 ## setup
 
 ```bash
-sudo waydroid init -s VANILLA|GAPPS -c 'https://ota.waydro.id/system' -v 'https://ota.waydro.id/vendor'
+sudo waydroid init -s GAPPS -c 'https://ota.waydro.id/system' -v 'https://ota.waydro.id/vendor'
 waydroid show-full-ui
 ```
 
